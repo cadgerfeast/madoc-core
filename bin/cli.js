@@ -77,6 +77,18 @@ const main = async (args) => {
       fs.emptyDirSync(distPath);
       process.env.MADOC_PATH = process.cwd();
       await _export(path.resolve(__dirname, '../'), distPath);
+      if (madocConfig.static) {
+        for (const staticDir of madocConfig.static) {
+          const staticDistPath = path.resolve(distPath, 'assets');
+          if (fs.statSync(path.resolve(rootPath, staticDir)).isDirectory()) {
+            fs.copySync(path.resolve(rootPath, staticDir), staticDistPath);
+          } else {
+            const fileName = path.basename(staticDir);
+            fs.ensureFileSync(path.resolve(staticDistPath, fileName));
+            fs.copyFileSync(path.resolve(rootPath, staticDir), path.resolve(staticDistPath, fileName));
+          }
+        }
+      }
       if (fs.existsSync(madocComponentsPath)) {
         madocCustomComponentsPath = path.resolve(rootPath, madocComponentsPath);
         const customComponents = require(madocCustomComponentsPath);
