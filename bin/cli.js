@@ -29,6 +29,25 @@ if (fs.existsSync(madocConfigPath)) {
 }
 madocConfig.dist = madocConfig.dist || 'dist';
 
+const _export = async (dest) => {
+  const { build: _build } = (await import('sapper/dist/build.js')).default;
+  await _build({
+    cwd: '.',
+    bunder: 'rollup',
+    legacy: true,
+    ext: '.svelte .html'
+  });
+  const { export: _export } = (await import('sapper/dist/export.js')).default;
+  await _export({
+    cwd: '.',
+    static: 'static',
+    build_dir: '__sapper__/build',
+    export_dir: dest,
+    concurrent: 8,
+    entry: '/'
+  });
+};
+
 const main = async (args) => {
   switch (args._[0]) {
     case 'init':
@@ -43,6 +62,7 @@ const main = async (args) => {
       console.info('TODO? ' + todo)
       return;
     case 'dev':
+      // TODO rewrite code
       spawn(`"${path.resolve("./node_modules/.bin/sapper")}"`, ['dev'], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../'),  env: { MADOC_PATH: process.cwd() } })
         .on('exit', (code) => {
           process.exit(code);
@@ -50,15 +70,12 @@ const main = async (args) => {
       return;
     case 'build':
       fs.emptyDirSync(path.resolve(process.cwd(), madocConfig.dist));
-      spawn(`"${path.resolve("./node_modules/.bin/sapper")}"`, ['export', '--legacy'], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../'), env: { MADOC_PATH: process.cwd() } })
-        .on('exit', (code) => {
-          fs.copySync(path.resolve(__dirname, '../__sapper__/export'), path.resolve(process.cwd(), madocConfig.dist));
-          console.info(c.green(`Documentation successfully built in ${c.cyan(madocConfig.dist)} folder.`));
-          console.info(c.white(`Run ${c.yellow('madoc serve')} to check out the generated website.`));
-          process.exit(code);
-        });
+      await _export(path.resolve(process.cwd(), madocConfig.dist));
+      console.info(c.green(`Documentation successfully built in ${c.cyan(madocConfig.dist)} folder.`));
+      console.info(c.white(`Run ${c.yellow('madoc serve')} to check out the generated website.`));
       return;
     case 'serve':
+      // TODO replace by express
       spawn(`"${path.resolve("./node_modules/.bin/serve")}"`, [path.resolve(process.cwd(), madocConfig.dist)], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../') })
         .on('exit', (code) => {
           process.exit(code);
