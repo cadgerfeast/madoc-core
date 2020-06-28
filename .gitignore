@@ -1,0 +1,5 @@
+/__sapper__
+/coverage
+/node_modules
+/src/node_modules
+/static/assets

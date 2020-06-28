@@ -1,0 +1,123 @@
+// App
+html, body, #app {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+  font-size: 16px;
+  background-color: var(--madoc-html-background-color);
+  color: var(--madoc-html-color);
+  transition: 
+    background-color .25s ease-out,
+    color .25s ease-out,
+    border .25s ease-out;
+}
+main {
+  position: relative;
+  box-sizing: border-box;
+  height: calc(100% - 3.5em - 1px);
+  > div.app-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+  }
+}
+// Markdown
+div.content {
+  section > :first-child {
+    margin-top: 0;
+  }
+  // Links
+  a {
+    color: var(--madoc-anchor-link-color);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  // Headings
+  h1 {
+    padding-bottom: .3em;
+    font-size: 2em;
+    border-bottom: 1px solid var(--madoc-heading-underline-color);
+    transition: border .25s ease-out;
+  }
+  h2 {
+    padding-bottom: .3em;
+    font-size: 1.5em;
+    border-bottom: 1px solid var(--madoc-heading-underline-color);
+    transition: border .25s ease-out;
+  }
+  h3 {
+    font-size: 1.25em
+  }
+  h4 {
+    font-size: 1em;
+  }
+  h5 {
+    font-size: .875em;
+  }
+  h6 {
+    font-size: .85em;
+    color: var(--madoc-heading-6-color);
+  }
+  // Emphasis
+  b, strong {
+    font-weight: 600;
+  }
+  blockquote {
+    padding: 0 1em;
+    color: var(--madoc-heading-6-color);
+    border-left: .25em solid var(--madoc-blockquote-border-color);
+    transition: border .25s ease-out;
+  }
+  hr {
+    height: .25em;
+    padding: 0;
+    margin: 24px 0;
+    background-color: var(--madoc-separator-color);
+    border: 0;
+    transition: background-color .25s ease-out;
+  }
+  code:not([class^="language-"]) {
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 85%;
+    background-color: var(--madoc-code-background-color);
+    color: var(--madoc-code-color);
+    border-radius: 3px;
+    transition:
+      background-color .25s ease-out,
+      color .25s ease-out;
+  }
+  // Tables
+  table {
+    width: 100%;
+    border-spacing: 0;
+    border-collapse: collapse;
+    tr {
+      background-color: var(--madoc-table-background-color);
+      border-top: 1px solid var(--madoc-table-border-color);
+      transition:
+        background-color .25s ease-out,
+        border .25s ease-out;
+      &:nth-child(2n) {
+        background-color: var(--madoc-table-background-color-2);
+      }
+      > th {
+        padding: 6px 13px;
+        border: 1px solid var(--madoc-table-border-color);
+        transition: border .25s ease-out;
+      }
+      > td {
+        padding: 6px 13px;
+        border: 1px solid var(--madoc-table-border-color);
+        transition: border .25s ease-out;
+      }
+    }
+  }
+}
