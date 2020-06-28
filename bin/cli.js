@@ -29,7 +29,8 @@ if (fs.existsSync(madocConfigPath)) {
 }
 madocConfig.dist = madocConfig.dist || 'dist';
 
-const _export = async (dest) => {
+const _export = async (cwd, dest) => {
+  process.chdir(cwd);
   const { build: _build } = (await import('sapper/dist/build.js')).default;
   await _build({
     cwd: '.',
@@ -70,7 +71,8 @@ const main = async (args) => {
       return;
     case 'build':
       fs.emptyDirSync(path.resolve(process.cwd(), madocConfig.dist));
-      await _export(path.resolve(process.cwd(), madocConfig.dist));
+      process.env.MADOC_PATH = process.cwd();
+      await _export(path.resolve(__dirname, '../'), path.resolve(process.cwd(), madocConfig.dist));
       console.info(c.green(`Documentation successfully built in ${c.cyan(madocConfig.dist)} folder.`));
       console.info(c.white(`Run ${c.yellow('madoc serve')} to check out the generated website.`));
       return;

@@ -1,7 +1,7 @@
 {
   "name": "@madoc/core",
   "description": "Markdown Documentation Framework",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Jérémie Pichon <contact@cadgerfeast.com>",
   "license": "MIT",
   "keywords": [
@@ -24,10 +24,12 @@
     "./static/favicon.png",
     "./static/logo-192.png",
     "./static/logo-512.png",
-    "./static/manifest.json"
+    "./static/manifest.json",
+    "rollup.config.js",
+    "svelte.config.js"
   ],
   "scripts": {
-    "install": "node scripts/install.js",
+    "install": "node bin/install.js",
     "test": "jest",
     "dev": "sapper dev",
     "build": "sapper export --legacy",
