@@ -53,7 +53,7 @@ if (fs.existsSync(madocComponentsPath)) {
 	customComponentsPath = path.resolve(rootPath, madocComponentsPath);
 	const customComponents = require(customComponentsPath);
 	for (const component of customComponents) {
-		component.copy(distPath, { path, copy: copySync });
+		component.copy(rootPath, distPath, { path, copy: copySync });
 	}
 }
 
