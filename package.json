@@ -30,7 +30,7 @@
     "svelte.config.js"
   ],
   "scripts": {
-    "install": "node bin/install.js",
+    "install": "node scripts/install.js",
     "test": "jest",
     "dev": "sapper dev",
     "build": "sapper export --legacy",
