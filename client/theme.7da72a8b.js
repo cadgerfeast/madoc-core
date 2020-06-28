@@ -1,0 +1,1 @@
+import"./index.6c9ca8d6.js";import{w as e,r as t}from"./index.3073af6f.js";const a=e(window.localStorage.getItem("madoc.theme")||"default"),o=t({default:{name:"Default",type:"light"},dark:{name:"Dark",type:"dark"},fresh:{name:"Fresh",type:"light"}});a.subscribe(e=>{window.localStorage.setItem("madoc.theme",e)});export{a as theme,o as themes};
