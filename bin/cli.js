@@ -43,14 +43,14 @@ const main = async (args) => {
       console.info('TODO? ' + todo)
       return;
     case 'dev':
-      spawn('npm', ['run', 'dev'], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../'),  env: { MADOC_PATH: process.cwd() } })
+      spawn('"./node_modules/.bin/sapper"', ['dev'], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../'),  env: { MADOC_PATH: process.cwd() } })
         .on('exit', (code) => {
           process.exit(code);
         });
       return;
     case 'build':
       fs.emptyDirSync(path.resolve(process.cwd(), madocConfig.dist));
-      spawn('npm', ['run', 'build'], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../'), env: { MADOC_PATH: process.cwd() } })
+      spawn('"./node_modules/.bin/sapper"', ['export', '--legacy'], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../'), env: { MADOC_PATH: process.cwd() } })
         .on('exit', (code) => {
           fs.copySync(path.resolve(__dirname, '../__sapper__/export'), path.resolve(process.cwd(), madocConfig.dist));
           console.info(c.green(`Documentation successfully built in ${c.cyan(madocConfig.dist)} folder.`));
@@ -59,7 +59,7 @@ const main = async (args) => {
         });
       return;
     case 'serve':
-      spawn('npm', ['run', 'serve', path.resolve(process.cwd(), madocConfig.dist)], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../') })
+      spawn('"./node_modules/.bin/serve"', [path.resolve(process.cwd(), madocConfig.dist)], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../') })
         .on('exit', (code) => {
           process.exit(code);
         });
