@@ -1,7 +1,7 @@
 {
   "name": "@madoc/core",
   "description": "Markdown Documentation Framework",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Jérémie Pichon <contact@cadgerfeast.com>",
   "license": "MIT",
   "keywords": [
@@ -30,7 +30,6 @@
     "svelte.config.js"
   ],
   "scripts": {
-    "install": "node scripts/install.js",
     "test": "jest",
     "dev": "sapper dev",
     "build": "sapper export --legacy",
