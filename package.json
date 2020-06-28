@@ -1,7 +1,7 @@
 {
   "name": "@madoc/core",
   "description": "Markdown Documentation Framework",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "Jérémie Pichon <contact@cadgerfeast.com>",
   "license": "MIT",
   "keywords": [
@@ -21,6 +21,7 @@
   "files": [
     "./bin",
     "./src",
+    "./scripts",
     "./static/favicon.png",
     "./static/logo-192.png",
     "./static/logo-512.png",
