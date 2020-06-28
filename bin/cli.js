@@ -22,8 +22,11 @@ const notes = [
   `  ${c.yellow('--help')}: Shows the help for a ${c.cyan('command')}.`
 ];
 
+const rootPath = process.env.MADOC_PATH || process.cwd();
+const madocComponentsPath = path.resolve(rootPath, './.madoc/components.js');
 let madocConfig = {};
 let madocConfigPath = path.resolve(process.cwd(), 'madoc.config.js');
+let madocCustomComponentsPath = '';
 if (fs.existsSync(madocConfigPath)) {
   madocConfig = require(madocConfigPath);
 }
@@ -70,9 +73,17 @@ const main = async (args) => {
         });
       return;
     case 'build':
-      fs.emptyDirSync(path.resolve(process.cwd(), madocConfig.dist));
+      const distPath = path.resolve(process.cwd(), madocConfig.dist);
+      fs.emptyDirSync(distPath);
       process.env.MADOC_PATH = process.cwd();
-      await _export(path.resolve(__dirname, '../'), path.resolve(process.cwd(), madocConfig.dist));
+      await _export(path.resolve(__dirname, '../'), distPath);
+      if (fs.existsSync(madocComponentsPath)) {
+        madocCustomComponentsPath = path.resolve(rootPath, madocComponentsPath);
+        const customComponents = require(madocCustomComponentsPath);
+        for (const component of customComponents) {
+          component.copy(rootPath, distPath, { path, copy: fs.copySync });
+        }
+      }
       console.info(c.green(`Documentation successfully built in ${c.cyan(madocConfig.dist)} folder.`));
       console.info(c.white(`Run ${c.yellow('madoc serve')} to check out the generated website.`));
       return;
