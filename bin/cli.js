@@ -7,6 +7,11 @@ const argv = require('yargs').argv;
 const { spawn } = require('child_process');
 const pkg = require('../package.json');
 
+// Helpers
+const { build } = require('./build');
+const { dev } = require('./dev');
+const { serve } = require('./serve');
+
 const notes = [
   '',
   `${c.green(`Madoc v${pkg.version} in use.`)}`,
@@ -27,30 +32,15 @@ const madocComponentsPath = path.resolve(rootPath, './.madoc/components.js');
 let madocConfig = {};
 let madocConfigPath = path.resolve(process.cwd(), 'madoc.config.js');
 let madocCustomComponentsPath = '';
+let customComponents;
+if (fs.existsSync(madocComponentsPath)) {
+  madocCustomComponentsPath = path.resolve(rootPath, madocComponentsPath);
+  customComponents = require(madocCustomComponentsPath);
+}
 if (fs.existsSync(madocConfigPath)) {
   madocConfig = require(madocConfigPath);
 }
 madocConfig.dist = madocConfig.dist || 'dist';
-
-const _export = async (cwd, dest) => {
-  process.chdir(cwd);
-  const { build: _build } = (await import('sapper/dist/build.js')).default;
-  await _build({
-    cwd: '.',
-    bunder: 'rollup',
-    legacy: true,
-    ext: '.svelte .html'
-  });
-  const { export: _export } = (await import('sapper/dist/export.js')).default;
-  await _export({
-    cwd: '.',
-    static: 'static',
-    build_dir: '__sapper__/build',
-    export_dir: dest,
-    concurrent: 8,
-    entry: '/'
-  });
-};
 
 const main = async (args) => {
   switch (args._[0]) {
@@ -66,45 +56,13 @@ const main = async (args) => {
       console.info('TODO? ' + todo)
       return;
     case 'dev':
-      // TODO rewrite code
-      spawn(`"${path.resolve("./node_modules/.bin/sapper")}"`, ['dev'], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../'),  env: { MADOC_PATH: process.cwd() } })
-        .on('exit', (code) => {
-          process.exit(code);
-        });
+      dev(rootPath, madocConfig, customComponents);
       return;
     case 'build':
-      const distPath = path.resolve(process.cwd(), madocConfig.dist);
-      fs.emptyDirSync(distPath);
-      process.env.MADOC_PATH = process.cwd();
-      await _export(path.resolve(__dirname, '../'), distPath);
-      if (madocConfig.static) {
-        for (const staticDir of madocConfig.static) {
-          const staticDistPath = path.resolve(distPath, 'assets');
-          if (fs.statSync(path.resolve(rootPath, staticDir)).isDirectory()) {
-            fs.copySync(path.resolve(rootPath, staticDir), staticDistPath);
-          } else {
-            const fileName = path.basename(staticDir);
-            fs.ensureFileSync(path.resolve(staticDistPath, fileName));
-            fs.copyFileSync(path.resolve(rootPath, staticDir), path.resolve(staticDistPath, fileName));
-          }
-        }
-      }
-      if (fs.existsSync(madocComponentsPath)) {
-        madocCustomComponentsPath = path.resolve(rootPath, madocComponentsPath);
-        const customComponents = require(madocCustomComponentsPath);
-        for (const component of customComponents) {
-          component.copy(rootPath, distPath, { path, copy: fs.copySync });
-        }
-      }
-      console.info(c.green(`Documentation successfully built in ${c.cyan(madocConfig.dist)} folder.`));
-      console.info(c.white(`Run ${c.yellow('madoc serve')} to check out the generated website.`));
+      await build(rootPath, madocConfig, customComponents);
       return;
     case 'serve':
-      // TODO replace by express
-      spawn(`"${path.resolve("./node_modules/.bin/serve")}"`, [path.resolve(process.cwd(), madocConfig.dist)], { stdio: 'inherit', shell: true, cwd: path.resolve(__dirname, '../') })
-        .on('exit', (code) => {
-          process.exit(code);
-        });
+      serve(path.resolve(process.cwd(), madocConfig.dist));
       return;
   }
 };

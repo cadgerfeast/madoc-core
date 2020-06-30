@@ -37,7 +37,7 @@ TODO
 #### Plugins
 
 - TODO Plugin Swagger
-- TODO Plugin Stencil
+- TODO Plugin Blog
 
 #### Static Assets
 

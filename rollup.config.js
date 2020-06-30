@@ -29,34 +29,20 @@ const stylePaths = [
 
 let madocConfig = {};
 let customComponentsPath = '';
+let customComponents = [];
 let buildDistPath;
 let distPath;
+
 if (fs.existsSync(madocConfigPath)) {
 	madocConfig = require(madocConfigPath);
 	madocConfig.dist = madocConfig.dist || 'dist';
 	buildDistPath = path.resolve(rootPath, madocConfig.dist);
-	distPath = dev ? path.resolve(__dirname, 'static') : buildDistPath;
-	if (madocConfig.static) {
-		for (const staticDir of madocConfig.static) {
-			const staticDistPath = path.resolve(distPath, 'assets');
-			if (fs.statSync(path.resolve(rootPath, staticDir)).isDirectory()) {
-				copySync(path.resolve(rootPath, staticDir), staticDistPath);
-			} else {
-				const fileName = path.basename(staticDir);
-				ensureFileSync(path.resolve(staticDistPath, fileName));
-				copyFileSync(path.resolve(rootPath, staticDir), path.resolve(staticDistPath, fileName));
-			}
-		}
-	}
+	distPath = path.resolve(__dirname, 'static');
 }
 if (fs.existsSync(madocComponentsPath)) {
 	customComponentsPath = path.resolve(rootPath, madocComponentsPath);
-	const customComponents = require(customComponentsPath);
-	for (const component of customComponents) {
-		component.copy(rootPath, distPath, { path, copy: copySync });
-	}
+	customComponents = require(customComponentsPath);
 }
-
 if (!customComponentsPath) {
 	customComponentsPath = '../components/custom/index.js';
 }
@@ -84,14 +70,50 @@ export default {
 		plugins: [
 			{
         buildStart () {
+					// Docs watcher
 					const watcher = path.resolve(rootPath, 'docs/**');
           glob(watcher, null, (err, files) => {
             files.forEach((file) => {
               this.addWatchFile(file);
             });
-          });
+					});
+					// Custom Watch
+					if (madocConfig.watch) {
+						for (const dir of madocConfig.watch) {
+							const watcher = path.resolve(rootPath, dir);
+							glob(watcher, null, (err, files) => {
+								files.forEach((file) => {
+									this.addWatchFile(file);
+								});
+							});
+						}
+					}
         }
-      },
+			},
+			{
+				generateBundle () {
+					if (dev) {
+						// Copy static assets
+						if (madocConfig.static) {
+							for (const staticDir of madocConfig.static) {
+								staticDir.dest = staticDir.dest || '';
+								const staticDistPath = path.resolve(distPath, `assets/${staticDir.dest}`);
+								if (fs.statSync(path.resolve(rootPath, staticDir.src)).isDirectory()) {
+									copySync(path.resolve(rootPath, staticDir.src), staticDistPath);
+								} else {
+									const fileName = path.basename(staticDir.src);
+									ensureFileSync(path.resolve(staticDistPath, fileName));
+									copyFileSync(path.resolve(rootPath, staticDir.src), path.resolve(staticDistPath, fileName));
+								}
+							}
+						}
+						// Copy Custom Component Static Assets
+						for (const component of customComponents) {
+							component.copy(rootPath, distPath, { path, copy: copySync });
+						}
+					}
+				}
+			},
 			alias({
 				entries: [
 					{ find: 'custom-madoc-components', replacement: customComponentsPath }

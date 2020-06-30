@@ -18,6 +18,7 @@
 	import { stores } from '@sapper/app';
 	import { onMount } from 'svelte';
 	import { storePage } from './_store.js';
+	import { dummy } from '../utils.js';
 
 	const { page } = stores();
 
@@ -36,6 +37,8 @@
 	export let config;
 	export let navbar;
 	export let sidebar;
+	export let segment;
+	dummy(segment);
 
 	let sidebarLinks = sidebar && sidebar.links;
 	storePage.subscribe((_page) => {

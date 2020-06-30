@@ -16,3 +16,5 @@ export function goTo (href) {
   }
   anchor.click();
 }
+
+export function dummy () {}
