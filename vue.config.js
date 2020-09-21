@@ -35,7 +35,7 @@ if (dev) {
 
 module.exports = {
   productionSourceMap: dev,
-  lintOnSave: true,
+  lintOnSave: false,
   pwa: {
     name: madocConfig.title
   },

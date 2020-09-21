@@ -1,7 +1,7 @@
 module.exports = {
   preset: '@vue/cli-plugin-unit-jest',
   testMatch: [
-    '**/test/**/*.spec.[jt]s?(x)'
+    '**/test/**/*.spec.js?(x)'
   ],
   setupFiles: [
     './test/mocks/setup.js'
