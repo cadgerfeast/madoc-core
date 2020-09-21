@@ -1,78 +1,71 @@
 #!/usr/bin/env node
-const fs = require('fs-extra');
+const Service = require('@vue/cli-service');
 const path = require('path');
-const c = require('ansi-colors');
-const inquirer = require('inquirer');
-const argv = require('yargs').argv;
-const { spawn } = require('child_process');
-const pkg = require('../package.json');
+const argv = require('minimist')(process.argv.slice(2));
 
-// Helpers
-const { build } = require('./build');
-const { dev } = require('./dev');
-const { serve } = require('./serve');
+const { getFileSystemConfig } = require('../src/helpers/config/node');
+const { Logger } = require('../src/helpers/logger');
 
-const notes = [
-  '',
-  `${c.green(`Madoc v${pkg.version} in use.`)}`,
-  '',
-  'Usage:',
-  `  madoc ${c.cyan('[cmd]')} ${c.yellow('{args}')}`,
-  '',
-  `${c.cyan('Commands')}:`,
-  `  ${c.cyan('dev')}: Runs the documentation in developement mode.`,
-  `  ${c.cyan('build')}: Builds the documentation as static website for production.`,
-  '',
-  `${c.yellow('Arguments')}:`,
-  `  ${c.yellow('--help')}: Shows the help for a ${c.cyan('command')}.`
-];
+const logger = new Logger('cli');
 
-const rootPath = process.env.MADOC_PATH || process.cwd();
-const madocComponentsPath = path.resolve(rootPath, './.madoc/components.js');
-let madocConfig = {};
-let madocConfigPath = path.resolve(process.cwd(), 'madoc.config.js');
-let madocCustomComponentsPath = '';
-let customComponents;
-if (fs.existsSync(madocComponentsPath)) {
-  madocCustomComponentsPath = path.resolve(rootPath, madocComponentsPath);
-  customComponents = require(madocCustomComponentsPath);
-}
-if (fs.existsSync(madocConfigPath)) {
-  madocConfig = require(madocConfigPath);
-}
-madocConfig.dist = madocConfig.dist || 'dist';
+const madocConfig = getFileSystemConfig(process.cwd());
+process.env.MADOC_PATH = process.cwd();
 
-const main = async (args) => {
-  switch (args._[0]) {
-    case 'init':
-      const { todo } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'todo',
-          message: 'Should I create this function to help you get started?',
-          default: true
-        }
-      ]);
-      console.info('TODO? ' + todo)
-      return;
-    case 'dev':
-      dev(rootPath, madocConfig, customComponents);
-      return;
-    case 'build':
-      await build(rootPath, madocConfig, customComponents);
-      return;
-    case 'serve':
-      serve(path.resolve(process.cwd(), madocConfig.dist));
-      return;
-  }
+const madocPath = path.resolve(__dirname, '../');
+
+const serviceArgs = {
+  modern: false,
+  report: false,
+  'report-json': false,
+  'inline-vue': false,
+  watch: false,
+  open: false,
+  copy: false,
+  https: false,
+  verbose: false
 };
 
-(async () => {
-  if (!argv._[0]) {
-    console.info(notes.join('\n'));
-    return;
-  }
-  await main(argv);
-})();
+// TODO init command
 
-module.exports.main = main;
+switch (argv._[0]) {
+  case 'dev': {
+    const port = 5000;
+    const yargs = {
+      _: [ 'serve' ],
+      ...serviceArgs,
+      port
+    };
+    const args = ['serve', '--port', port.toString()];
+    const service = new Service(madocPath);
+    service.run('serve', yargs, args)
+    .catch((err) => {
+      logger.error(err);
+      process.exit(1);
+    });
+    break;
+  }
+  case 'build': {
+    const distPath = path.resolve(process.cwd(), madocConfig.distPath);
+    const yargs = {
+      _: [ 'build' ],
+      ...serviceArgs,
+      dest: distPath
+    };
+    const args = ['build', '--dest', distPath];
+    const service = new Service(madocPath);
+    service.run('build', yargs, args)
+    .catch((err) => {
+      logger.error(err);
+    })
+    .finally(() => {
+      process.exit(0);
+    });
+    break;
+  }
+  case 'serve': {
+    const port = 5001;
+    const { serve } = require('../src/helpers/cli/serve');
+    serve(port, madocConfig);
+    break;
+  }
+}

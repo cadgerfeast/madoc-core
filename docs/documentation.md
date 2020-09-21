@@ -45,7 +45,7 @@ Separated by ---
 
 ![Alt Text][Logo]
 
-[Logo]: /favicon.png "Super logo here!"
+[Logo]: /img/icons/android-chrome-192x192.png "Super logo here!"
 
 ##### H5: Highlighting
 

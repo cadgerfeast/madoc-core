@@ -2,6 +2,8 @@
 links:
   - title: Home
     path: /
+  - title: Sub
+    path: /sub
   - title: Documentation
     path: /documentation
 github:

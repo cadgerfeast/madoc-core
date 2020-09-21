@@ -1,3 +1,5 @@
 module.exports = {
-  dist: '__sapper__/export'
+  title: 'Madoc',
+  description: 'Markdown Documentation Framework',
+  docsPath: 'docs'
 };

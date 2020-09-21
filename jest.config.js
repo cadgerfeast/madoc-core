@@ -1,25 +1,17 @@
 module.exports = {
-  transform: {
-    '^.+\\.js$': 'babel-jest',
-    '^.+\\.svelte$': 'jest-transform-svelte'
-  },
-  moduleFileExtensions: [
-    'js',
-    'json',
-    'svelte'
+  preset: '@vue/cli-plugin-unit-jest',
+  testMatch: [
+    '**/test/**/*.spec.[jt]s?(x)'
   ],
-  testPathIgnorePatterns: ['node_modules'],
-  bail: false,
-  verbose: true,
-  transformIgnorePatterns: ['node_modules'],
-  setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
   setupFiles: [
-    '<rootDir>/test/setup.js'
+    './test/mocks/setup.js'
   ],
+  moduleNameMapper: {
+    'register-service-worker': '<rootDir>/test/mocks/register-service-worker.js'
+  },
   collectCoverage: true,
+  coverageDirectory: 'coverage',
   collectCoverageFrom: [
-    'bin/**/*.js',
-    'src/**/*.js',
-    'src/**/*.svelte'
+    '**/src/**/*.{js,vue}'
   ]
 };

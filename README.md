@@ -10,13 +10,26 @@
 
 ## Installation
 
-Madoc is built with [Svelte], so you'll need it as a dev dependency.
+**Madoc** is a **MA**rkdown **DOC**umentation Framework.
+
+It will help your generate a static documentation website.
+
+How to get started easily:
 
 ``` bash
-npm install --save-dev @madoc/core svelte
+# Install globally
+npm install -g @madoc/core
+# Install locally
+npm install --save-dev @madoc/core
+# Initialize a project
+madoc init
+# Start the project in development
+madoc dev
+# Build the final website
+madoc build
+# Check out the final website
+madoc serve
 ```
-
-[Svelte]: https://svelte.dev/ "Svelte Website"
 
 ## Quick Feature Preview
 
@@ -40,5 +53,9 @@ TODO
 - TODO Plugin Blog
 
 #### Static Assets
+
+TODO
+
+# IE11 support
 
 TODO

@@ -1,0 +1,78 @@
+// Links
+a {
+  color: var(--madoc-anchor-link-color);
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+// Headings
+h1 {
+  padding-bottom: .3em;
+  font-size: 2em;
+  border-bottom: 1px solid var(--madoc-heading-underline-color);
+}
+h2 {
+  padding-bottom: .3em;
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--madoc-heading-underline-color);
+}
+h3 {
+  font-size: 1.25em
+}
+h4 {
+  font-size: 1em;
+}
+h5 {
+  font-size: .875em;
+}
+h6 {
+  font-size: .85em;
+  color: var(--madoc-heading-6-color);
+}
+// Emphasis
+b, strong {
+  font-weight: 600;
+}
+blockquote {
+  padding: 0 1em;
+  color: var(--madoc-heading-6-color);
+  border-left: .25em solid var(--madoc-blockquote-border-color);
+}
+hr {
+  height: .25em;
+  padding: 0;
+  margin: 24px 0;
+  background-color: var(--madoc-separator-color);
+  border: 0;
+}
+code:not([class^="language-"]) {
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  padding: .2em .4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: var(--madoc-code-background-color);
+  color: var(--madoc-code-color);
+  border-radius: 3px;
+}
+// Tables
+table {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+  tr {
+    background-color: var(--madoc-table-background-color);
+    border-top: 1px solid var(--madoc-table-border-color);
+    &:nth-child(2n) {
+      background-color: var(--madoc-table-background-color-2);
+    }
+    > th {
+      padding: 6px 13px;
+      border: 1px solid var(--madoc-table-border-color);
+    }
+    > td {
+      padding: 6px 13px;
+      border: 1px solid var(--madoc-table-border-color);
+    }
+  }
+}
