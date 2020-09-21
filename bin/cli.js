@@ -56,9 +56,7 @@ switch (argv._[0]) {
     service.run('build', yargs, args)
     .catch((err) => {
       logger.error(err);
-    })
-    .finally(() => {
-      process.exit(0);
+      process.exit(1);
     });
     break;
   }
