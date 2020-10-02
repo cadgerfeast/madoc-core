@@ -14,7 +14,6 @@ const customComponentsPath = path.resolve(madocPath, 'src/components/custom');
 const assetsPath = path.resolve(madocPath, 'public/assets');
 
 fs.emptyDirSync(customComponentsPath);
-fs.emptyDirSync(assetsPath);
 
 marked.setOptions({
 	highlight: (code, lang) => {
@@ -32,38 +31,33 @@ marked.setOptions({
 	}
 });
 
-let _config;
-
 module.exports.getFileSystemConfig = (rootPath) => {
+  fs.emptyDirSync(assetsPath);
   let rawConfig;
-  if (!_config) {
+  if (fs.existsSync(path.resolve(rootPath, 'madoc.config.js'))) {
     // JS
-    if (fs.existsSync(path.resolve(rootPath, 'madoc.config.js'))) {
-      try {
-        rawConfig = require(path.resolve(rootPath, 'madoc.config.js'));
-        rawConfig.configPath = path.resolve(rootPath, 'madoc.config.js');
-      } catch (error) {
-        logger.error(`JavaScript error syntax on Madoc configuration file: ${c.yellow(path.resolve(rootPath, 'madoc.config.js'))}`);
-        logger.error(error);
-      }
+    try {
+      rawConfig = require(path.resolve(rootPath, 'madoc.config.js'));
+      rawConfig.configPath = path.resolve(rootPath, 'madoc.config.js');
+    } catch (error) {
+      logger.error(`JavaScript error syntax on Madoc configuration file: ${c.yellow(path.resolve(rootPath, 'madoc.config.js'))}`);
+      logger.error(error);
     }
+  } else if (fs.existsSync(path.resolve(rootPath, 'madoc.config.json'))) {
     // JSON
-    if (fs.existsSync(path.resolve(rootPath, 'madoc.config.json'))) {
-      const fileContent = fs.readFileSync(path.resolve(rootPath, 'madoc.config.json'), 'utf8');
-      try {
-        rawConfig = JSON.parse(fileContent);
-        rawConfig.configPath = path.resolve(rootPath, 'madoc.config.json');
-      } catch (error) {
-        logger.error(`JSON error syntax on Madoc configuration file: ${c.yellow(path.resolve(rootPath, 'madoc.config.json'))}`);
-        logger.error(error);
-      }
+    const fileContent = fs.readFileSync(path.resolve(rootPath, 'madoc.config.json'), 'utf8');
+    try {
+      rawConfig = JSON.parse(fileContent);
+      rawConfig.configPath = path.resolve(rootPath, 'madoc.config.json');
+    } catch (error) {
+      logger.error(`JSON error syntax on Madoc configuration file: ${c.yellow(path.resolve(rootPath, 'madoc.config.json'))}`);
+      logger.error(error);
     }
-    // TODO support YAML
-    // TODO support package.json madoc
-    rawConfig.rootPath = rootPath;
-    _config = computeMadocConfig(rawConfig);
   }
-  return _config;
+  // TODO support YAML
+  // TODO support package.json madoc
+  rawConfig.rootPath = rootPath;
+  return computeMadocConfig(rawConfig);
 };
 
 const computeMadocConfig = (rawConfig) => {
@@ -74,14 +68,22 @@ const computeMadocConfig = (rawConfig) => {
     distPath: 'dist',
     components: [],
     head: [],
+    watch: [],
     assets: [],
     ...rawConfig
   };
+  computeMadocWatch(config);
   computeMadocDocs(config);
   computeMadocAssets(config);
   computeMadocComponents(config);
   computeMadocDocsPages(config);
   return config;
+};
+
+const computeMadocWatch = (config) => {
+  for (let i = 0; i < config.watch.length; i++) {
+    config.watch[i] = path.resolve(config.rootPath, config.watch[i]);
+  }
 };
 
 const computeMadocAssets = (config) => {
@@ -97,10 +99,20 @@ const computeMadocAssets = (config) => {
 const computeMadocComponents = (config) => {
   let customContent = '';
   for (const c of config.components) {
+    c.files = c.files || [];
+    c.head = c.head || [];
+    c.assets = c.assets || [];
     const fileName = path.basename(c.entry);
     customContent += `import './${fileName}';\n`;
     fs.copyFileSync(path.resolve(c.rootPath, c.entry), path.resolve(customComponentsPath, fileName));
     config.head = [...c.head, ...config.head];
+    for (const file of c.files) {
+      if (fs.statSync(path.resolve(c.rootPath, file)).isDirectory()) {
+        fs.copySync(path.resolve(c.rootPath, file), path.resolve(assetsPath, file));
+      } else {
+        fs.copyFileSync(path.resolve(c.rootPath, file), path.resolve(customComponentsPath, path.basename(file)));
+      }
+    }
     for (const asset of c.assets) {
       if (fs.statSync(path.resolve(c.rootPath, asset.src)).isDirectory()) {
         fs.copySync(path.resolve(c.rootPath, asset.src), path.resolve(assetsPath, asset.dest || ''));
@@ -109,7 +121,15 @@ const computeMadocComponents = (config) => {
       }
     }
   }
-  fs.writeFileSync(path.resolve(customComponentsPath, 'index.js'), customContent);
+  const customComponentsEntryPath = path.resolve(customComponentsPath, 'index.js');
+  if (fs.existsSync(customComponentsEntryPath)) {
+    const customComponentsEntryContent = fs.readFileSync(customComponentsEntryPath, 'utf8');
+    if (customComponentsEntryContent !== customContent) {
+      fs.writeFileSync(customComponentsEntryPath, customContent);
+    }
+  } else {
+    fs.writeFileSync(customComponentsEntryPath, customContent);
+  }
 };
 
 const computeMadocDocs = (config) => {
@@ -145,8 +165,9 @@ const processMarkdownFile = (pagePath, config) => {
     metadata.sidebar = computeSidebar(filePath, config);
   }
   // Content
+  const vue = metadata.vue;
   const sections = processMadoc(content, config, filePath);
-	return { path: pagePath, metadata, sections };
+	return { path: pagePath, metadata, sections, vue };
 };
 
 const processMarkdownMetadataByFile = (filePath) => {

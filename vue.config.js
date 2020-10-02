@@ -1,33 +1,48 @@
+const webpack = require('webpack');
 const fs = require('fs-extra');
 const path = require('path');
 const chokidar = require('chokidar');
 const { getFileSystemConfig } = require('./src/helpers/config/node');
+const { Logger } = require('./src/helpers/logger');
+const c = require('ansi-colors');
 const dev = process.env.NODE_ENV === 'development';
+
+const logger = new Logger('madoc');
 
 const rootPath = process.env.MADOC_PATH || process.cwd();
 const madocConfig = getFileSystemConfig(rootPath);
 
-// TODO should not have to reload everything in order to dev
-// TODO if config changes, set a warning that new madoc dev should be reloaded
+const computeMadocConfiguration = () => {
+  return JSON.stringify(getFileSystemConfig(rootPath));
+};
 
 if (dev) {
   const hotReloadFile = path.resolve(__dirname, 'public/index.html');
-  const watcher = chokidar.watch([
-    madocConfig.configPath,
-    madocConfig.docsPath
+  const configWatch = chokidar.watch([
+    madocConfig.configPath
   ], {
     persistent: true,
     ignoreInitial: true
   });
-  watcher.on('add', () => {
+  configWatch.on('change', () => {
+    logger.warn(`Madoc configuration has been modified, you have to run ${c.cyan('madoc dev')} again.`);
+  });
+  const docsWatcher = chokidar.watch([
+    madocConfig.docsPath,
+    ...madocConfig.watch
+  ], {
+    persistent: true,
+    ignoreInitial: true
+  });
+  docsWatcher.on('add', () => {
     const content = fs.readFileSync(hotReloadFile, 'utf8');
     fs.writeFileSync(hotReloadFile, content);
   });
-  watcher.on('change', () => {
+  docsWatcher.on('change', () => {
     const content = fs.readFileSync(hotReloadFile, 'utf8');
     fs.writeFileSync(hotReloadFile, content);
   });
-  watcher.on('unlink', () => {
+  docsWatcher.on('unlink', () => {
     const content = fs.readFileSync(hotReloadFile, 'utf8');
     fs.writeFileSync(hotReloadFile, content);
   });
@@ -47,7 +62,7 @@ module.exports = {
       return args;
     });
     config.plugin('define').tap((defs) => {
-      defs[0]['process.env'].madocConfig = JSON.stringify(madocConfig);
+      defs[0]['process.env'].madocConfig = webpack.DefinePlugin.runtimeValue(computeMadocConfiguration, true);
       return defs;
     });
   }

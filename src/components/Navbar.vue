@@ -26,13 +26,11 @@
 </template>
 
 <script>
-import { EvaIcon } from 'vue-eva-icons';
 import ColorPicker from '@/components/ColorPicker.vue';
 export default {
   name: 'Navbar',
   components: {
-    ColorPicker,
-    [EvaIcon.name]: EvaIcon
+    ColorPicker
   },
   data () {
     return {

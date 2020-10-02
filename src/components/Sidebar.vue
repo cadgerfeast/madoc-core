@@ -1,20 +1,24 @@
 <template>
   <nav class="madoc-sidebar">
-    <ul class="madoc-sidebar-list">
-      <li
-        v-for="(link, index) in sidebar.links"
-        :key="index">
-        <router-link :to="link.path">
-          {{ link.title }}
-        </router-link>
-      </li>
-    </ul>
+    <template v-for="(group, index) in groups">
+      <span class="madoc-sidebar-title" v-if="group.name" :key="`title-${index}`">{{ group.name }}</span>
+      <ul class="madoc-sidebar-list" :key="`list-${index}`">
+        <li
+          class="madoc-sidebar-list-item"
+          v-for="link in group"
+          :key="link.title">
+          <router-link :to="link.path">
+            {{ link.title }}
+          </router-link>
+        </li>
+      </ul>
+    </template>
   </nav>
 </template>
 
 <script>
 export default {
-  name: 'Navbar',
+  name: 'Sidebar',
   data () {
     return {};
   },
@@ -22,8 +26,22 @@ export default {
     page () {
       return this.$store.getters.pages[this.$route.name];
     },
-    sidebar () {
-      return this.page.metadata.sidebar;
+    groups () {
+      const groups = {};
+      let group = 0;
+      for (const link of this.page.metadata.sidebar.links) {
+        if (link.group) {
+          group++;
+          groups[group] = groups[group] || [];
+          groups[group].name = link.group;
+          groups[group].push(...link.links);
+          group++;
+        } else {
+          groups[group] = groups[group] || [];
+          groups[group].push(link);
+        }
+      }
+      return groups;
     }
   }
 };
@@ -33,11 +51,22 @@ export default {
 nav.madoc-sidebar {
   min-width: 250px;
   border-right: 1px solid var(--madoc-heading-underline-color);
+  > span.madoc-sidebar-title {
+    display: block;
+    font-weight: bold;
+    padding: 0 1em;
+  }
   > ul.madoc-sidebar-list {
     margin: 0;
-    padding: 1em;
+    padding: 0 1em;
     list-style: none;
-    > li {
+    &:first-child {
+      padding-top: 1em;
+    }
+    &:not(:last-child) {
+      padding-bottom: 1em;
+    }
+    > li.madoc-sidebar-list-item {
       border-left: 1px solid var(--madoc-heading-underline-color);
       &:last-child {
         border-bottom: 1px solid var(--madoc-heading-underline-color);

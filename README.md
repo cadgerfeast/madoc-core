@@ -59,3 +59,5 @@ TODO
 # IE11 support
 
 TODO
+
+TODO prism bash

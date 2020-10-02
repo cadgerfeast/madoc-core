@@ -1,4 +1,5 @@
 const express = require('express');
+const history = require('connect-history-api-fallback');
 const c = require('ansi-colors');
 const { getFileSystemConfig } = require('../config/node');
 const { Logger } = require('../logger');
@@ -8,6 +9,7 @@ const logger = new Logger('cli/serve');
 const serve = (port, config) => {
   const app = express();
 
+  app.use(history());
   app.use('/', express.static(config.distPath));
 
   app.listen(port, function () {
