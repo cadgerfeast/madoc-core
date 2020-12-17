@@ -9,9 +9,9 @@ const { Logger } = require('../logger');
 const logger = new Logger('config');
 
 const madocPath = path.resolve(__dirname, '../../../');
-const nodeModulesPath = path.resolve(madocPath, 'node_modules');
 const customComponentsPath = path.resolve(madocPath, 'src/components/custom');
 const assetsPath = path.resolve(madocPath, 'public/assets');
+let madocRootPath = process.cwd();
 
 fs.emptyDirSync(customComponentsPath);
 
@@ -19,8 +19,8 @@ marked.setOptions({
 	highlight: (code, lang) => {
 		let hl;
     try {
-			const prismLanguagePath = path.resolve(nodeModulesPath, `prismjs/components/prism-${lang}.js`);
-			if (fs.existsSync(prismLanguagePath)) {
+			const prismLanguagePath = path.resolve(madocRootPath, `node_modules/prismjs/components/prism-${lang}.js`);
+      if (fs.existsSync(prismLanguagePath)) {
 				require(`prismjs/components/prism-${lang}`);
 			}
 			hl = Prism.highlight(code, Prism.languages[lang], lang);
@@ -57,6 +57,7 @@ module.exports.getFileSystemConfig = (rootPath) => {
   // TODO support YAML
   // TODO support package.json madoc
   rawConfig.rootPath = rootPath;
+  madocRootPath = rootPath;
   return computeMadocConfig(rawConfig);
 };
 
@@ -103,8 +104,10 @@ const computeMadocComponents = (config) => {
     c.head = c.head || [];
     c.assets = c.assets || [];
     const fileName = path.basename(c.entry);
-    customContent += `import './${fileName}';\n`;
-    fs.copyFileSync(path.resolve(c.rootPath, c.entry), path.resolve(customComponentsPath, fileName));
+    if (path.resolve(c.rootPath, c.entry)) {
+      customContent += `import './${fileName}';\n`;
+      fs.copyFileSync(path.resolve(c.rootPath, c.entry), path.resolve(customComponentsPath, fileName));
+    }
     config.head = [...c.head, ...config.head];
     for (const file of c.files) {
       if (fs.statSync(path.resolve(c.rootPath, file)).isDirectory()) {

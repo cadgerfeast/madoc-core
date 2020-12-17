@@ -23,6 +23,9 @@ export const store = new Vuex.Store({
     config: process.env.madocConfig
   },
   getters: {
+    config (state) {
+      return state.config;
+    },
     theme (state) {
       return state.theme;
     },

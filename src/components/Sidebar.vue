@@ -49,6 +49,7 @@ export default {
 
 <style lang="scss" scoped>
 nav.madoc-sidebar {
+  margin: 20px 0;
   min-width: 250px;
   border-right: 1px solid var(--madoc-heading-underline-color);
   > span.madoc-sidebar-title {

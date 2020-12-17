@@ -11,9 +11,11 @@ const logger = new Logger('madoc');
 
 const rootPath = process.env.MADOC_PATH || process.cwd();
 const madocConfig = getFileSystemConfig(rootPath);
-
+madocConfig.dev = dev;
 const computeMadocConfiguration = () => {
-  return JSON.stringify(getFileSystemConfig(rootPath));
+  const config = getFileSystemConfig(rootPath);
+  config.dev = dev;
+  return JSON.stringify(config);
 };
 
 if (dev) {
