@@ -4,6 +4,7 @@ const yaml = require('yaml');
 const c = require('ansi-colors');
 const marked = require('marked');
 const Prism = require('prismjs');
+const { JSDOM } = require('jsdom');
 const { Logger } = require('../logger');
 
 const logger = new Logger('config');
@@ -100,11 +101,13 @@ const computeMadocAssets = (config) => {
 const computeMadocComponents = (config) => {
   let customContent = '';
   for (const c of config.components) {
+    c.context = {};
+    c.instance = 0;
     c.files = c.files || [];
     c.head = c.head || [];
     c.assets = c.assets || [];
     const fileName = path.basename(c.entry);
-    if (path.resolve(c.rootPath, c.entry)) {
+    if (fs.existsSync(path.resolve(c.rootPath, c.entry))) {
       customContent += `import './${fileName}';\n`;
       fs.copyFileSync(path.resolve(c.rootPath, c.entry), path.resolve(customComponentsPath, fileName));
     }
@@ -169,8 +172,8 @@ const processMarkdownFile = (pagePath, config) => {
   }
   // Content
   const vue = metadata.vue;
-  const sections = processMadoc(content, config, filePath);
-	return { path: pagePath, metadata, sections, vue };
+  const html = processMadoc(content, config, filePath);
+	return { path: pagePath, metadata, html, vue };
 };
 
 const processMarkdownMetadataByFile = (filePath) => {
@@ -205,40 +208,30 @@ const computeSidebar = (filePath, config) => {
 };
 
 const processMadoc = (markdown, config, filePath) => {
-  const sections = [];
-	let stringBuffer = '';
-	for (const line of markdown.split('\n')) {
-		let hasCustom = false;
-		for (const component of config.components) {
-			if (line.startsWith(`[${component.tag}]`)) {
-				hasCustom = true;
-				sections.push({
-					type: 'md',
-					content: marked(stringBuffer)
+  const { document } = (new JSDOM(marked(markdown))).window;
+  for (const component of config.components) {
+    const els = document.getElementsByTagName(component.tag);
+    for (const el of els) {
+      if (el) {
+        const attrs = {};
+        for (const attribute of el.attributes) {
+          attrs[attribute.name] = attribute.value;
+        }
+        el.setAttribute(':context', `getContext('${component.tag}', ${component.instance})`);
+        component.context[component.instance] = component.parse({
+          attrs,
+          filePath,
+          fn: {
+            processMarkdownMetadataByFile
+          }
         });
-        sections.push({
-					type: component.tag,
-					content: component.parse(line, {
-            filePath,
-            fn: {
-              processMarkdownMetadataByFile
-            }
-          })
-				});
-				stringBuffer = '';
-			}
-		}
-		if (!hasCustom) {
-			stringBuffer += `${line}\n`;
-		}
-	}
-	if (stringBuffer) {
-		sections.push({
-			type: 'md',
-			content: marked(stringBuffer)
-		});
-	}
-	return sections;
+      }
+      component.instance++;
+    }
+  }
+  const root = document.createElement('div');
+  root.innerHTML = document.getElementsByTagName('body')[0].innerHTML;
+  return root.outerHTML;
 };
 
 const getFilePathsInFolder = (folderPath, parentPath = '', files = []) => {

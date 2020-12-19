@@ -3,24 +3,28 @@
     <template v-if="page.vue">
       <component v-bind:is="page.vue.type" :context="page.vue.context"></component>
     </template>
-    <template v-else v-for="(section, index) in page.sections">
-      <div v-if="section.type === 'md'" :key="index" class="madoc-section"  v-html="section.content"></div>
-      <div v-else :key="index" class="madoc-section">
-        <component v-bind:is="section.type" :context="section.content"></component>
-      </div>
-    </template>
+    <VRuntimeTemplate v-else :template="page.html"></VRuntimeTemplate>
   </div>
 </template>
 
 <script>
+import VRuntimeTemplate from 'v-runtime-template';
 export default {
   name: 'Madoc',
+  components: {
+    VRuntimeTemplate
+  },
   data () {
     return {};
   },
   computed: {
     page () {
       return this.$store.getters.pages[this.$route.name];
+    }
+  },
+  methods: {
+    getContext (tag, instance = 0) {
+      return this.$store.getters.config.components.find((c) => c.tag === tag).context[instance];
     }
   }
 };

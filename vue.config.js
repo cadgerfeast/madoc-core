@@ -51,6 +51,7 @@ if (dev) {
 }
 
 module.exports = {
+  runtimeCompiler: true,
   productionSourceMap: dev,
   lintOnSave: false,
   pwa: {
