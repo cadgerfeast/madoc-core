@@ -17,6 +17,7 @@ Object.defineProperty(process, 'env', {
   writable: true,
   value: {
     madocConfig: {
+      ignoredElements: [],
       filePaths: []
     }
   }
