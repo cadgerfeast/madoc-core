@@ -1,5 +1,5 @@
 <template>
-  <div class="madoc-color-picker">
+  <div class="madoc-color-picker" :class="{ left, right }">
     <ul class="madoc-theme-list">
       <li
         v-for="(theme, key) in themes"
@@ -17,8 +17,15 @@
 <script>
 export default {
   name: 'ColorPicker',
-  data () {
-    return {};
+  props: {
+    right: {
+      type: Boolean,
+      default: false
+    },
+    left: {
+      type: Boolean,
+      default: false
+    }
   },
   computed: {
     activeTheme () {
@@ -40,10 +47,15 @@ export default {
 div.madoc-color-picker {
   position: absolute;
   z-index: 1;
-  right: 0;
   background-color: var(--madoc-html-background-color);
   border: 1px solid var(--madoc-heading-underline-color);
-  border-right: none;
+  &.left {
+    left: 0;
+  }
+  &.right {
+    right: 0;
+    border-right: none;
+  }
   > ul.madoc-theme-list {
     margin: 0;
     padding: 0;

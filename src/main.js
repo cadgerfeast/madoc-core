@@ -15,6 +15,11 @@ Vue.use(EvaIcons);
 // Production
 Vue.config.productionTip = false;
 
+// Ignored Elements
+Vue.config.ignoredElements = store.getters.config.ignoredElements.map((reg) => {
+  return new RegExp(reg);
+});
+
 // Create Main Vue Instance
 new Vue({
   router,

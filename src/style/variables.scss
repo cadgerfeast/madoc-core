@@ -5,7 +5,7 @@
   // Flash
   --madoc-light-orange: #FF4F1F;
   --madoc-dark-orange: #E36209;
-
+  
   // Grey Shade
   --madoc-grey-1: #111111;
   --madoc-grey-2: #222222;
@@ -37,8 +37,9 @@
   --madoc-github-grey-9: #9DA5B4;
   --madoc-github-grey-10: #181A1F;
   --madoc-github-grey-11: #1B1D23;
-  --madoc-github-grey-12: #f6f8fa;
-
+  --madoc-github-grey-12: #F6F8FA;
+  --madoc-github-grey-13: #393e42;
+  --madoc-github-grey-14: #4c5154;
   // Opacity
   --madoc-white-opacity-50: rgba(255, 255, 255, 0.5);
   --madoc-black-opacity-25: rgba(0, 0, 0, 0.25);
@@ -76,6 +77,8 @@
   --madoc-wheel-background-color: var(--madoc-black);
   --madoc-wheel-text-color: var(--madoc-white);
   --madoc-navbar-icon-color: var(--madoc-grey-5);
+  --madoc-html-background-hover-color: var(--madoc-github-grey-1);
+  --madoc-html-background-active-color: var(--madoc-github-grey-5);
 }
 // Dark
 *[theme="dark"] {
@@ -101,6 +104,8 @@
   --madoc-wheel-background-color: var(--madoc-white);
   --madoc-wheel-text-color: var(--madoc-black);
   --madoc-navbar-icon-color: var(--madoc-grey-9);
+  --madoc-html-background-hover-color: var(--madoc-github-grey-13);
+  --madoc-html-background-active-color: var(--madoc-github-grey-14);
 }
 // Dark
 *[theme="fresh"] {
@@ -126,4 +131,6 @@
   --madoc-wheel-background-color: var(--madoc-black);
   --madoc-wheel-text-color: var(--madoc-white);
   --madoc-navbar-icon-color: var(--madoc-grey-blue-3);
+  --madoc-html-background-hover-color: var(--madoc-github-grey-5);
+  --madoc-html-background-active-color: var(--madoc-github-grey-9);
 }

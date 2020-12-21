@@ -72,6 +72,7 @@ const computeMadocConfig = (rawConfig) => {
     head: [],
     watch: [],
     assets: [],
+    ignoredElements: [],
     ...rawConfig
   };
   computeMadocWatch(config);
@@ -156,11 +157,17 @@ const processMarkdownFile = (pagePath, config) => {
   // TODO manage error
   const filePath = path.resolve(config.docsPath, `${pagePath}.md`);
   const fileContent = fs.readFileSync(filePath, 'utf8');
-	const match = /---\n([\s\S]+?)\n---/.exec(fileContent);
-	let content = fileContent.slice(match[0].length);
-	const metadata = yaml.parse(match[1]);
-	if (metadata.content) {
-		content = fs.readFileSync(path.resolve(filePath, `../${metadata.content}`), 'utf8');
+  const match = /^(?:---)(.*?)(?:---|\.\.\.)/s.exec(fileContent);
+  let content = '';
+  let metadata = {};
+  if (match) {
+    content = fileContent.slice(match[0].length);
+    metadata = yaml.parse(match[1]);
+    if (metadata.content) {
+      content = fs.readFileSync(path.resolve(filePath, `../${metadata.content}`), 'utf8');
+    }
+  } else {
+    content = fileContent;
   }
   // Navbar
   if (metadata.navbar === undefined) {
@@ -170,17 +177,33 @@ const processMarkdownFile = (pagePath, config) => {
   if (metadata.sidebar === undefined) {
     metadata.sidebar = computeSidebar(filePath, config);
   }
+  // Tabs
+  if (metadata.tabs && metadata.tabs.length) {
+    metadata.tabs = computeTabs(metadata.tabs, filePath, config);
+  }
   // Content
-  const vue = metadata.vue;
   const html = processMadoc(content, config, filePath);
-	return { path: pagePath, metadata, html, vue };
+	return { path: pagePath, metadata, html };
 };
 
 const processMarkdownMetadataByFile = (filePath) => {
   // TODO manage error
   const fileContent = fs.readFileSync(filePath, 'utf8');
-	const match = /---\n([\s\S]+?)\n---/.exec(fileContent);
-	return yaml.parse(match[1]);
+  const match = /^(?:---)(.*?)(?:---|\.\.\.)/s.exec(fileContent);
+  if (match) {
+    return yaml.parse(match[1]);
+  }
+};
+
+const getMarkdownFileContent = (filePath) => {
+  // TODO manage error
+  const fileContent = fs.readFileSync(filePath, 'utf8');
+  const match = /^(?:---)(.*?)(?:---|\.\.\.)/s.exec(fileContent);
+  if (match) {
+    return fileContent.slice(match[0].length);
+  } else {
+    return fileContent;
+  }
 };
 
 const computeNavbar = (filePath, config) => {
@@ -205,6 +228,16 @@ const computeSidebar = (filePath, config) => {
   } else {
     return null;
   }
+};
+
+const computeTabs = (tabs, filePath, config) => {
+  // TODO manage error
+  for (const tab of tabs) {
+    const tabFilePath = path.resolve(filePath, `../${tab.content}`);
+    tab.metadata = processMarkdownMetadataByFile(tabFilePath);
+    tab.content =  processMadoc(getMarkdownFileContent(tabFilePath), config, filePath);
+  }
+  return tabs;
 };
 
 const processMadoc = (markdown, config, filePath) => {

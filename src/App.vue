@@ -46,6 +46,7 @@ html {
   height: 100%;
   width: 100%;
   font-family: 'Roboto';
+  font-size: 14px;
 }
 body {
   height: 100%;

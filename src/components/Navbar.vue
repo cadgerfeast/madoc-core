@@ -15,11 +15,11 @@
           <eva-icon name="github" animation="pulse" width="30" height="30"></eva-icon>
 				</a>
 			</li>
-      <li class="icon menu" @click="showColorPicker = !showColorPicker">
+      <li v-if="showThemePicker" class="icon menu" @click="showColorPicker = !showColorPicker">
         <div class="icon-container">
           <eva-icon name="color-palette" animation="pulse" width="30" height="30"></eva-icon>
         </div>
-        <ColorPicker v-show="showColorPicker"></ColorPicker>
+        <ColorPicker v-show="showColorPicker" right></ColorPicker>
       </li>
     </ul>
   </nav>
@@ -38,6 +38,9 @@ export default {
     };
   },
   computed: {
+    showThemePicker () {
+      return (this.navbar['theme-picker'] !== undefined) ? this.navbar['theme-picker'] : true;
+    },
     page () {
       return this.$store.getters.pages[this.$route.name];
     },
